@@ -4,7 +4,7 @@
   "description": "A user management service",
   "main": "index.js",
   "scripts": {
-    "dev": "node src/server.js"
+    "dev": "node dist/index.js"
   },
   "keywords": [
     "Kuntal",
@@ -12,5 +12,9 @@
     "<kuntalghosh.ewu@gmail.com>"
   ],
   "author": "Kuntal Ghosh <kuntalghosh.ewu@gmail.com>",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^20.8.9",
+    "typescript": "^5.2.2"
+  }
 }
