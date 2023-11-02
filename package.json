@@ -8,7 +8,8 @@
     "format:check": "prettier . --c",
     "format:fix": "prettier . --w",
     "lint": "npx eslint .",
-    "lint:fix":"npx eslint . --fix"
+    "lint:fix": "npx eslint . --fix",
+    "prepare": "husky install"
   },
   "keywords": [
     "Kuntal",
@@ -23,6 +24,7 @@
     "@typescript-eslint/parser": "^6.9.1",
     "eslint": "^8.52.0",
     "eslint-config-prettier": "^9.0.0",
+    "husky": "^8.0.3",
     "prettier": "3.0.3",
     "typescript": "^5.2.2"
   }
