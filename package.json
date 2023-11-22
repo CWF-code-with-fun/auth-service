@@ -4,7 +4,7 @@
   "description": "A user management service",
   "main": "index.js",
   "scripts": {
-    "dev": "node dist/index.js",
+    "dev": "nodemon src/server.ts",
     "format:check": "prettier . --c",
     "format:fix": "prettier . --w",
     "lint": "npx eslint .",
@@ -19,6 +19,7 @@
   "author": "Kuntal Ghosh <kuntalghosh.ewu@gmail.com>",
   "license": "ISC",
   "devDependencies": {
+    "@types/express": "^4.17.20",
     "@types/node": "^20.8.9",
     "@typescript-eslint/eslint-plugin": "^6.9.1",
     "@typescript-eslint/parser": "^6.9.1",
@@ -27,6 +28,7 @@
     "husky": "^8.0.3",
     "lint-staged": "^15.0.2",
     "prettier": "3.0.3",
+    "ts-node": "^10.9.1",
     "typescript": "^5.2.2"
   },
   "lint-staged": {
@@ -36,6 +38,8 @@
     ]
   },
   "dependencies": {
-    "dotenv": "^16.3.1"
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "nodemon": "^3.0.1"
   }
 }
