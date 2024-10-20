@@ -1,23 +1,26 @@
-import bcrypt from 'bcryptjs';
-import { UserRepository } from '../repositories/userRepository';
-import { generateAccessToken, generateRefreshToken } from '../utils/tokenUtils';
+import { RegisterUserUseCase } from '../useCases/RegisterUserUseCase';
+import { LoginUserUseCase } from '../useCases/LoginUserUseCase';
+import { RefreshTokenUseCase } from '../useCases/RefreshTokenUseCase';
+import { PrismaUserRepository } from '../infrastructure/repositories/PrismaUserRepository';
+import { UserService } from '../domain/services/UserService';
 
-const userRepository = new UserRepository();
+const userRepository = new PrismaUserRepository();
+const userService = new UserService(userRepository);
+
+const registerUserUseCase = new RegisterUserUseCase();
+const loginUserUseCase = new LoginUserUseCase();
+const refreshTokenUseCase = new RefreshTokenUseCase(userService);
 
 export class AuthService {
-    async registerUser(email: string, password: string) {
-        const hashedPassword = await bcrypt.hash(password, 10);
-        return userRepository.createUser(email, hashedPassword);
+    async register(email: string, password: string) {
+        return registerUserUseCase.execute(email, password);
     }
 
-    async loginUser(email: string, password: string) {
-        const user = await userRepository.findByEmail(email);
-        if (!user || !(await bcrypt.compare(password, user.password))) {
-            throw new Error('Invalid credentials');
-        }
-        const accessToken = generateAccessToken(user.id);
-        const refreshToken = generateRefreshToken(user.id);
-        await userRepository.updateRefreshToken(user.id, refreshToken);
-        return { accessToken, refreshToken };
+    async login(email: string, password: string) {
+        return loginUserUseCase.execute(email, password);
+    }
+
+    async refreshToken(refreshToken: string) {
+        return refreshTokenUseCase.execute(refreshToken);
     }
 }

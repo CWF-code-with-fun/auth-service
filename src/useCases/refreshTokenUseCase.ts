@@ -1,14 +1,17 @@
-import { UserRepository } from '../repositories/userRepository';
-import { generateAccessToken } from '../utils/tokenUtils';
-
-const userRepository = new UserRepository();
+import { UserService } from '../domain/services/UserService';
+import { TokenService } from '../infrastructure/auth/tokenServices';
 
 export class RefreshTokenUseCase {
+    private tokenService = new TokenService();
+
+    constructor(private userService: UserService) {}
+
     async execute(refreshToken: string) {
-        const user = await userRepository.findByRefreshToken(refreshToken);
+        const user =
+            await this.userService.findUserByRefreshToken(refreshToken);
         if (!user) {
             throw new Error('Invalid refresh token');
         }
-        return generateAccessToken(user.id);
+        return this.tokenService.generateAccessToken(user.id);
     }
 }
