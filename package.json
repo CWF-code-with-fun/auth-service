@@ -4,7 +4,7 @@
   "description": "A user management service",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon src/server.ts",
+    "dev": "nodemon src/main/server.ts",
     "format:check": "prettier . --c",
     "format:fix": "prettier . --w",
     "lint": "npx eslint .",
@@ -61,6 +61,7 @@
     "express": "^4.21.1",
     "http-errors": "^2.0.0",
     "jsonwebtoken": "^9.0.2",
+    "module-alias": "^2.2.3",
     "nodemailer": "^6.9.15",
     "nodemon": "^3.0.1",
     "passport": "^0.7.0",

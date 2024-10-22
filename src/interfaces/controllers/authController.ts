@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-call */
 // /* eslint-disable @typescript-eslint/no-unsafe-argument */
 // /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 // import { Request, Response } from 'express';
@@ -63,23 +64,23 @@
 // };
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-import { Request, Response } from 'express';
-import { AuthService } from '../services/authService';
-import { sendResponse } from '../utils/responseUtils';
-import { PrismaUserRepository } from '../infrastructure/repositories/PrismaUserRepository';
-import { UserService } from '../domain/services/UserService';
-import { TokenService } from '../infrastructure/auth/tokenServices';
-import { LoginUserUseCase } from '../useCases/LoginUserUseCase';
-import { RefreshTokenUseCase } from '../useCases/RefreshTokenUseCase';
-import { RegisterUserUseCase } from '../useCases/RegisterUserUseCase';
+import { NextFunction, Request, Response } from 'express';
+import { sendResponse } from '../../utils/responseUtils';
+import { PrismaUserRepository } from '../../infrastructure/repositories/PrismaUserRepository';
+import { UserService } from '../../domain/services/UserService';
+import { TokenService } from '../../infrastructure/auth/tokenServices';
+import { LoginUserUseCase } from '../../application/useCases/LoginUserUseCase';
+import { RefreshTokenUseCase } from '../../application/useCases/refreshTokenUseCase';
+import { RegisterUserUseCase } from '../../application/useCases/RegisterUserUseCase';
+import { NotFoundError } from '../../domain/errors';
 
-const authService = new AuthService();
 const userRepository = new PrismaUserRepository();
 const userService = new UserService(userRepository);
 const tokenService = new TokenService();
 
 const registerUserUseCase = new RegisterUserUseCase();
 const loginUserUseCase = new LoginUserUseCase();
+const refreshTokenUseCase = new RefreshTokenUseCase();
 // const refreshTokenUseCase = new RefreshTokenUseCase(userService, tokenService);
 
 /**
@@ -122,6 +123,7 @@ export const register = async (req: Request, res: Response) => {
             data: user,
         });
     } catch (error) {
+        // console.log('error');
         const errorMessage =
             error instanceof Error
                 ? error.message
@@ -194,7 +196,7 @@ export const login = async (req: Request, res: Response) => {
 export const refresh = async (req: Request, res: Response) => {
     const { refreshToken } = req.body;
     try {
-        const accessToken = await authService.refreshToken(refreshToken);
+        const accessToken = await RefreshTokenUseCase;
         sendResponse(res, {
             status: 200,
             message: 'Access token refreshed successfully',
@@ -206,5 +208,24 @@ export const refresh = async (req: Request, res: Response) => {
                 ? error.message
                 : 'An unknown error occurred';
         sendResponse(res, { status: 403, message: errorMessage });
+    }
+};
+
+/**
+ * @swagger
+ * /auth/test-error:
+ *   get:
+ *     summary: Test endpoint to throw NotFoundError
+ *     tags: [Auth]
+ *     responses:
+ *       404:
+ *         description: NotFoundError thrown
+ */
+export const test = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        console.log('test');
+        throw new NotFoundError('Test NotFoundError');
+    } catch (error) {
+        next(error);
     }
 };

@@ -10,10 +10,3 @@ CREATE TABLE "User" (
 
 -- CreateIndex
 CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
-
--- DropTable (Down Migration)
-DROP TABLE IF EXISTS "User";
-
--- DropIndex (Down Migration)
-DROP INDEX IF EXISTS "User_email_key";
-

@@ -5,6 +5,7 @@
 import swaggerJsdoc from 'swagger-jsdoc';
 import swaggerUi from 'swagger-ui-express';
 import { Express } from 'express';
+import path from 'path';
 
 const options = {
     definition: {
@@ -14,7 +15,7 @@ const options = {
             version: '1.0.0',
         },
     },
-    apis: ['./src/routes/*.ts', './src/controllers/*.ts'], // files containing annotations as above
+    apis: [path.resolve(__dirname, '../../interfaces/controllers/*.ts')], // files containing annotations as above
 };
 
 const specs = swaggerJsdoc(options);

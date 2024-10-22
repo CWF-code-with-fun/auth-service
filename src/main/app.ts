@@ -77,8 +77,9 @@
 // export default app;
 import express from 'express';
 import dotenv from 'dotenv';
-import authRoutes from './routes/authRoutes';
-import { setupSwagger } from './swagger';
+import authRoutes from '../interfaces/routes/authRoutes';
+import { setupSwagger } from '../infrastructure/swagger/swagger';
+import { errorHandler } from '../interfaces/middleware/errorHandlers';
 
 dotenv.config();
 
@@ -88,5 +89,8 @@ app.use(express.json());
 app.use('/auth', authRoutes);
 
 setupSwagger(app); // Add this line to set up Swagger
+
+// Error handling middleware
+app.use(errorHandler);
 
 export default app;
