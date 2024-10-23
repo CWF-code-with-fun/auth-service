@@ -42,4 +42,7 @@ export class UserService {
     ): Promise<void> {
         await this.userRepository.updateRefreshToken(userId, refreshToken);
     }
+    async findUserById(id: number): Promise<User | null> {
+        return this.userRepository.findUserById(id);
+    }
 }

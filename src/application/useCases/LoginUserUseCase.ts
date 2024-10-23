@@ -7,6 +7,7 @@ import { Email } from '../../domain/valueObjects/Email';
 import { PrismaUserRepository } from '../../infrastructure/repositories/PrismaUserRepository';
 import { PasswordHasher } from '../../domain/services/PasswordHasher';
 import { BcryptPasswordHasher } from '../../infrastructure/security/BcryptPasswordHasher';
+import { ValidationError } from '../../domain/errors';
 
 export class LoginUserUseCase {
     private userService: UserService;
@@ -20,15 +21,14 @@ export class LoginUserUseCase {
     async execute(email: string, password: string) {
         const emailVO = new Email(email);
         const user = await this.userService.findUserByEmail(emailVO);
-        if (!user) {
-            throw new Error('Invalid credentials');
-        }
 
         if (
             !user ||
             !(await this.hashPassword.compare(password, user.password))
         ) {
-            throw new Error('Invalid credentials');
+            throw new ValidationError([
+                'Please Provide Valid Email or Password ',
+            ]);
         }
 
         const accessToken = generateAccessToken(user.id);

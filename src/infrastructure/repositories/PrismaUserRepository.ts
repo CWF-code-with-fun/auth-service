@@ -8,6 +8,22 @@ import { NotFoundError } from '../../domain/errors';
 const prisma = new PrismaClient();
 
 export class PrismaUserRepository implements UserRepository {
+    async findUserById(id: number): Promise<User | null> {
+        try {
+            const user = await prisma.user.findUnique({
+                where: { id },
+            });
+            if (!user) return null;
+            return new User(
+                user.id,
+                new Email(user.email),
+                user.password,
+                user.refreshToken ?? undefined,
+            );
+        } catch (error) {
+            throw new NotFoundError('User not found');
+        }
+    }
     async createUser(user: User): Promise<User> {
         try {
             const createdUser = await prisma.user.create({
@@ -75,6 +91,22 @@ export class PrismaUserRepository implements UserRepository {
             });
         } catch (error) {
             throw new DatabaseError('Failed to update refresh token');
+        }
+    }
+    async findById(id: number): Promise<User | null> {
+        try {
+            const user = await prisma.user.findUnique({
+                where: { id },
+            });
+            if (!user) return null;
+            return new User(
+                user.id,
+                new Email(user.email),
+                user.password,
+                user.refreshToken ?? undefined,
+            );
+        } catch (error) {
+            throw new NotFoundError('User not found');
         }
     }
 }

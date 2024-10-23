@@ -78,6 +78,8 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import compression from 'compression';
+import session from 'express-session';
+import passport from '../infrastructure/auth/passport';
 import authRoutes from '../interfaces/routes/authRoutes';
 import { setupSwagger } from '../infrastructure/swagger/swagger';
 import { errorHandler } from '../interfaces/middleware/errorHandlers';
@@ -86,10 +88,23 @@ dotenv.config();
 
 const app = express();
 
+// Middleware
 app.use(compression());
 app.use(express.json());
+app.use(
+    session({
+        secret: process.env.SESSION_SECRET!,
+        resave: false,
+        saveUninitialized: false,
+    }),
+);
+app.use(passport.initialize());
+app.use(passport.session());
+
+// Routes
 app.use('/auth', authRoutes);
 
+// Swagger setup
 setupSwagger(app); // Add this line to set up Swagger
 
 // Error handling middleware

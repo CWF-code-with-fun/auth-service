@@ -113,7 +113,11 @@ const refreshTokenUseCase = new RefreshTokenUseCase();
  *       500:
  *         description: Internal server error
  */
-export const register = async (req: Request, res: Response) => {
+export const register = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+) => {
     const { email, password } = req.body;
     try {
         const user = await registerUserUseCase.execute(email, password);
@@ -123,12 +127,13 @@ export const register = async (req: Request, res: Response) => {
             data: user,
         });
     } catch (error) {
-        // console.log('error');
-        const errorMessage =
-            error instanceof Error
-                ? error.message
-                : 'An unknown error occurred';
-        sendResponse(res, { status: 500, message: errorMessage });
+        // // console.log('error');
+        // const errorMessage =
+        //     error instanceof Error
+        //         ? error.message
+        //         : 'An unknown error occurred';
+        // sendResponse(res, { status: 500, message: errorMessage });
+        next(error);
     }
 };
 
@@ -155,7 +160,11 @@ export const register = async (req: Request, res: Response) => {
  *       401:
  *         description: Invalid credentials
  */
-export const login = async (req: Request, res: Response) => {
+export const login = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+) => {
     const { email, password } = req.body;
     try {
         const tokens = await loginUserUseCase.execute(email, password);
@@ -165,11 +174,12 @@ export const login = async (req: Request, res: Response) => {
             data: tokens,
         });
     } catch (error) {
-        const errorMessage =
-            error instanceof Error
-                ? error.message
-                : 'An unknown error occurred';
-        sendResponse(res, { status: 401, message: errorMessage });
+        // const errorMessage =
+        //     error instanceof Error
+        //         ? error.message
+        //         : 'An unknown error occurred';
+        // sendResponse(res, { status: 401, message: errorMessage });
+        next(error);
     }
 };
 /**
@@ -193,21 +203,26 @@ export const login = async (req: Request, res: Response) => {
  *       403:
  *         description: Invalid refresh token
  */
-export const refresh = async (req: Request, res: Response) => {
+export const refresh = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+) => {
     const { refreshToken } = req.body;
     try {
-        const accessToken = await RefreshTokenUseCase;
+        const accessToken = await refreshTokenUseCase.execute(refreshToken);
         sendResponse(res, {
             status: 200,
             message: 'Access token refreshed successfully',
             data: { accessToken },
         });
     } catch (error) {
-        const errorMessage =
-            error instanceof Error
-                ? error.message
-                : 'An unknown error occurred';
-        sendResponse(res, { status: 403, message: errorMessage });
+        // const errorMessage =
+        //     error instanceof Error
+        //         ? error.message
+        //         : 'An unknown error occurred';
+        // sendResponse(res, { status: 403, message: errorMessage });
+        next(error);
     }
 };
 
@@ -223,7 +238,6 @@ export const refresh = async (req: Request, res: Response) => {
  */
 export const test = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        console.log('test');
         throw new NotFoundError('Test NotFoundError');
     } catch (error) {
         next(error);

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
 // /* eslint-disable @typescript-eslint/no-misused-promises */
 // import express, { Request, Response } from 'express';
 // import bcrypt from 'bcryptjs';
@@ -228,6 +229,7 @@ import express from 'express';
 import { register, login, refresh, test } from '../controllers/authController';
 import { registerUserValidator } from '../../application/validators/registerUserValidator';
 import { validateRequest } from '../middleware/validateRequest';
+import passport from '../../infrastructure/auth/passport';
 
 const router = express.Router();
 
@@ -235,5 +237,41 @@ router.post('/register', registerUserValidator, validateRequest, register);
 router.post('/login', login);
 router.post('/token', refresh);
 router.get('/test-error', test);
+
+/**
+ * @swagger
+ * /auth/google:
+ *   get:
+ *     summary: Authenticate with Google
+ *     description: Redirects the user to Google for authentication.
+ *     responses:
+ *       302:
+ *         description: Redirects to Google for authentication.
+ */
+router.get(
+    '/google',
+    passport.authenticate('google', { scope: ['email', 'profile'] }),
+);
+
+/**
+ * @swagger
+ * /auth/google/callback:
+ *   get:
+ *     summary: Google OAuth callback
+ *     description: Handles the callback from Google after authentication.
+ *     responses:
+ *       302:
+ *         description: Redirects to the home page after successful authentication.
+ *       401:
+ *         description: Unauthorized.
+ */
+router.get(
+    '/google/callback',
+    passport.authenticate('google', { failureRedirect: '/' }),
+    (req, res) => {
+        // Successful authentication, redirect home.
+        res.redirect('/');
+    },
+);
 
 export default router;

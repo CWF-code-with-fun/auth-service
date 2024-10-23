@@ -5,4 +5,5 @@ export interface UserRepository {
     findByRefreshToken(refreshToken: string): Promise<User | null>;
     createUser(user: User): Promise<User>;
     updateRefreshToken(userId: number, refreshToken: string): Promise<void>;
+    findUserById(id: number): Promise<User | null>;
 }

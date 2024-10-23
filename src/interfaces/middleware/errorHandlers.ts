@@ -6,6 +6,7 @@ import {
     DatabaseError,
 } from '../../domain/errors';
 import { UserAlreadyExistsError } from '../../domain/errors/UserAlreadyExists';
+import { sendResponse } from '../../utils/responseUtils';
 
 export const errorHandler = (
     err: Error,
@@ -13,9 +14,12 @@ export const errorHandler = (
     res: Response,
     next: NextFunction,
 ) => {
+    console.log('🚀 ~ err:', err);
+
     if (err instanceof DomainError) {
         if (err instanceof UserAlreadyExistsError) {
-            return res.status(409).json({
+            return sendResponse(res, {
+                status: 409,
                 success: false,
                 message: err.message,
                 timestamp: new Date().toISOString(),
@@ -29,11 +33,11 @@ export const errorHandler = (
             });
         }
         if (err instanceof ValidationError) {
-            console.log('🚀 ~ err:', err);
-
-            return res.status(400).json({
+            return sendResponse(res, {
+                status: 400,
                 success: false,
                 message: err.messages,
+                errorCode: err.name,
                 timestamp: new Date().toISOString(),
             });
         }
@@ -51,7 +55,7 @@ export const errorHandler = (
         });
     }
 
-    res.status(500).json({
+    return res.status(500).json({
         success: false,
         message: 'Internal Server Error',
         timestamp: new Date().toISOString(),

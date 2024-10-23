@@ -2,7 +2,7 @@ import { Response } from 'express';
 
 interface ResponseData {
     status: number;
-    message: string;
+    message: string | string[];
     data?: unknown;
     success?: boolean;
     errorCode?: string;
