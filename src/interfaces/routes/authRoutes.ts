@@ -226,10 +226,12 @@
 // export default router;
 import express from 'express';
 import { register, login, refresh, test } from '../controllers/authController';
+import { registerUserValidator } from '../../application/validators/registerUserValidator';
+import { validateRequest } from '../middleware/validateRequest';
 
 const router = express.Router();
 
-router.post('/register', register);
+router.post('/register', registerUserValidator, validateRequest, register);
 router.post('/login', login);
 router.post('/token', refresh);
 router.get('/test-error', test);

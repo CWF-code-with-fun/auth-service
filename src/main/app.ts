@@ -77,6 +77,7 @@
 // export default app;
 import express from 'express';
 import dotenv from 'dotenv';
+import compression from 'compression';
 import authRoutes from '../interfaces/routes/authRoutes';
 import { setupSwagger } from '../infrastructure/swagger/swagger';
 import { errorHandler } from '../interfaces/middleware/errorHandlers';
@@ -85,6 +86,7 @@ dotenv.config();
 
 const app = express();
 
+app.use(compression());
 app.use(express.json());
 app.use('/auth', authRoutes);
 

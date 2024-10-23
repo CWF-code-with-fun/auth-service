@@ -5,6 +5,7 @@ import {
     ValidationError,
     DatabaseError,
 } from '../../domain/errors';
+import { UserAlreadyExistsError } from '../../domain/errors/UserAlreadyExists';
 
 export const errorHandler = (
     err: Error,
@@ -12,9 +13,14 @@ export const errorHandler = (
     res: Response,
     next: NextFunction,
 ) => {
-    console.log('🚀 ~ err:', err);
-
     if (err instanceof DomainError) {
+        if (err instanceof UserAlreadyExistsError) {
+            return res.status(409).json({
+                success: false,
+                message: err.message,
+                timestamp: new Date().toISOString(),
+            });
+        }
         if (err instanceof NotFoundError) {
             return res.status(404).json({
                 success: false,
@@ -23,9 +29,11 @@ export const errorHandler = (
             });
         }
         if (err instanceof ValidationError) {
+            console.log('🚀 ~ err:', err);
+
             return res.status(400).json({
                 success: false,
-                message: err.message,
+                message: err.messages,
                 timestamp: new Date().toISOString(),
             });
         }
@@ -43,7 +51,6 @@ export const errorHandler = (
         });
     }
 
-    console.error('instance of NotFoundError', err instanceof NotFoundError);
     res.status(500).json({
         success: false,
         message: 'Internal Server Error',

@@ -21,7 +21,7 @@ export class UserService {
         );
 
         if (existingUser) {
-            throw new ValidationError('Email is already in use');
+            throw new ValidationError(['Email is already in use']);
         }
         const hashedPassword = await this.passwordHasher.hash(password);
         const user = new User(0, email, hashedPassword);
