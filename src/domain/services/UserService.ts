@@ -15,10 +15,6 @@ export class UserService {
         const existingUser = await this.userRepository.findByEmail(
             email.getValue(),
         );
-        console.log(
-            '🚀 ~ UserService ~ registerUser ~ existingUser:',
-            existingUser,
-        );
 
         if (existingUser) {
             throw new ValidationError(['Email is already in use']);

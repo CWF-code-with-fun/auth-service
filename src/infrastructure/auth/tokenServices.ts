@@ -1,6 +1,7 @@
 import jwt from 'jsonwebtoken';
+import { ITokenService } from '../../domain/services/ITokenService';
 
-export class TokenService {
+export class TokenService implements ITokenService {
     generateAccessToken(userId: number): string {
         return jwt.sign({ userId }, process.env.ACCESS_TOKEN_SECRET!, {
             expiresIn: '15m',

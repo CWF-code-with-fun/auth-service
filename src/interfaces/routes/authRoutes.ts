@@ -226,16 +226,24 @@
 
 // export default router;
 import express from 'express';
-import { register, login, refresh, test } from '../controllers/authController';
+import {
+    register,
+    login,
+    refresh,
+    test,
+    authWithGoogle,
+    googleAuthCallback,
+    logout,
+} from '../controllers/authController';
 import { registerUserValidator } from '../../application/validators/registerUserValidator';
 import { validateRequest } from '../middleware/validateRequest';
-import passport from '../../infrastructure/auth/passport';
 
 const router = express.Router();
 
 router.post('/register', registerUserValidator, validateRequest, register);
 router.post('/login', login);
 router.post('/token', refresh);
+router.post('/logout', logout);
 router.get('/test-error', test);
 
 /**
@@ -248,10 +256,7 @@ router.get('/test-error', test);
  *       302:
  *         description: Redirects to Google for authentication.
  */
-router.get(
-    '/google',
-    passport.authenticate('google', { scope: ['email', 'profile'] }),
-);
+router.get('/google', authWithGoogle);
 
 /**
  * @swagger
@@ -265,13 +270,6 @@ router.get(
  *       401:
  *         description: Unauthorized.
  */
-router.get(
-    '/google/callback',
-    passport.authenticate('google', { failureRedirect: '/' }),
-    (req, res) => {
-        // Successful authentication, redirect home.
-        res.redirect('/');
-    },
-);
+router.get('/google/callback', googleAuthCallback);
 
 export default router;

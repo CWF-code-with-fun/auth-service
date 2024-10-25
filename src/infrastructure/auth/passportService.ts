@@ -5,6 +5,7 @@ import { PrismaUserRepository } from '../repositories/PrismaUserRepository';
 import { UserService } from '../../domain/services/UserService';
 import { User } from '../../domain/entities/User';
 import { Email } from '../../domain/valueObjects/Email';
+import { authWithGoogle } from '../../interfaces/controllers/authController';
 
 const userRepository = new PrismaUserRepository();
 const userService = new UserService(userRepository);
@@ -48,5 +49,7 @@ passport.deserializeUser(async (id: number, done) => {
         done(error, null);
     }
 });
+
+export class PassportService {}
 
 export default passport;

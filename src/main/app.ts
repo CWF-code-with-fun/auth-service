@@ -79,7 +79,7 @@ import express from 'express';
 import dotenv from 'dotenv';
 import compression from 'compression';
 import session from 'express-session';
-import passport from '../infrastructure/auth/passport';
+import passport from '../infrastructure/auth/passportService';
 import authRoutes from '../interfaces/routes/authRoutes';
 import { setupSwagger } from '../infrastructure/swagger/swagger';
 import { errorHandler } from '../interfaces/middleware/errorHandlers';

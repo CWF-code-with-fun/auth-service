@@ -73,6 +73,7 @@ import { LoginUserUseCase } from '../../application/useCases/LoginUserUseCase';
 import { RefreshTokenUseCase } from '../../application/useCases/refreshTokenUseCase';
 import { RegisterUserUseCase } from '../../application/useCases/RegisterUserUseCase';
 import { NotFoundError } from '../../domain/errors';
+import passport from '../../infrastructure/auth/passportService';
 
 const userRepository = new PrismaUserRepository();
 const userService = new UserService(userRepository);
@@ -228,6 +229,50 @@ export const refresh = async (
 
 /**
  * @swagger
+ * /auth/logout:
+ *   post:
+ *     summary: Logout a user
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               refreshToken:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: User logged out successfully
+ *       403:
+ *         description: Invalid refresh token
+ */
+export const logout = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+) => {
+    const { refreshToken } = req.body;
+    try {
+        const accessToken = await refreshTokenUseCase.execute(refreshToken);
+        sendResponse(res, {
+            status: 200,
+            message: 'Access token refreshed successfully',
+            data: { accessToken },
+        });
+    } catch (error) {
+        // const errorMessage =
+        //     error instanceof Error
+        //         ? error.message
+        //         : 'An unknown error occurred';
+        // sendResponse(res, { status: 403, message: errorMessage });
+        next(error);
+    }
+};
+
+/**
+ * @swagger
  * /auth/test-error:
  *   get:
  *     summary: Test endpoint to throw NotFoundError
@@ -242,4 +287,27 @@ export const test = async (req: Request, res: Response, next: NextFunction) => {
     } catch (error) {
         next(error);
     }
+};
+
+export const authWithGoogle = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+) => {
+    passport.authenticate('google', { scope: ['email', 'profile'] })(
+        req,
+        res,
+        next,
+    );
+};
+
+export const googleAuthCallback = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+) => {
+    passport.authenticate('google', { failureRedirect: '/' })(req, res, () => {
+        // Successful authentication, redirect home.
+        res.redirect('/');
+    });
 };
