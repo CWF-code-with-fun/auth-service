@@ -1,7 +1,14 @@
 export class Email {
-    constructor(private readonly value: string) {
-        if (!this.isValidEmail(value)) {
-            throw new Error('Invalid email address');
+    private readonly value: string;
+
+    constructor(value: string | Email) {
+        if (value instanceof Email) {
+            this.value = value.getValue();
+        } else {
+            if (!this.isValidEmail(value)) {
+                throw new Error('Invalid email address');
+            }
+            this.value = value;
         }
     }
 

@@ -83,6 +83,7 @@ import passport from '../infrastructure/auth/passportService';
 import authRoutes from '../interfaces/routes/authRoutes';
 import { setupSwagger } from '../infrastructure/swagger/swagger';
 import { errorHandler } from '../interfaces/middleware/errorHandlers';
+import userRoutes from '../interfaces/routes/userRoutes';
 
 dotenv.config();
 
@@ -103,6 +104,7 @@ app.use(passport.session());
 
 // Routes
 app.use('/auth', authRoutes);
+app.use('/users', userRoutes);
 
 // Swagger setup
 setupSwagger(app); // Add this line to set up Swagger

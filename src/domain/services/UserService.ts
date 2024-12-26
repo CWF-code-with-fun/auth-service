@@ -41,4 +41,7 @@ export class UserService {
     async findUserById(id: number): Promise<User | null> {
         return this.userRepository.findUserById(id);
     }
+    async findAllUsers(): Promise<User[]> {
+        return this.userRepository.findAllUsers();
+    }
 }

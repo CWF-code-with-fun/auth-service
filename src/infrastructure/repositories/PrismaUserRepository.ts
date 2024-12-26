@@ -8,6 +8,20 @@ import { NotFoundError } from '../../domain/errors';
 const prisma = new PrismaClient();
 
 export class PrismaUserRepository implements UserRepository {
+    findAllUsers(): Promise<User[]> {
+        const users = prisma.user.findMany();
+        return users.then((users) =>
+            users.map(
+                (user) =>
+                    new User(
+                        user.id,
+                        new Email(user.email),
+                        user.password,
+                        user.refreshToken ?? undefined,
+                    ),
+            ),
+        );
+    }
     async findUserById(id: number): Promise<User | null> {
         try {
             const user = await prisma.user.findUnique({
@@ -18,6 +32,7 @@ export class PrismaUserRepository implements UserRepository {
                 user.id,
                 new Email(user.email),
                 user.password,
+
                 user.refreshToken ?? undefined,
             );
         } catch (error) {

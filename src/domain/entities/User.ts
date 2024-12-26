@@ -6,6 +6,8 @@ export class User {
         public email: Email,
         public password: string,
         public refreshToken?: string,
+        public name?: string,
+
     ) {}
 
     changeEmail(newEmail: Email) {
