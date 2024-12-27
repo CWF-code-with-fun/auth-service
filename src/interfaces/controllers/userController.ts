@@ -11,7 +11,7 @@ const getAllUsersUseCase = new GetAllUsersUseCase();
 export const downloadUsers = async (req: Request, res: Response, next: NextFunction) => {
     console.log('downloadUsers requerst',req.query);
     try {
-        const users =  await getAllUsersUseCase.execute();
+        const users =  await getAllUsersUseCase.execute({ offset:0, limit: 1000000 });
         const format = req.query.format;
 
         let fileBuffer: Buffer;
@@ -46,7 +46,10 @@ export const downloadUsers = async (req: Request, res: Response, next: NextFunct
 
 export const getUsers = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const users = await getAllUsersUseCase.execute();
+        const offset = parseInt(req.query.offset as string) || 0;
+        const limit = parseInt(req.query.limit as string) || 1000;
+
+        const users = await getAllUsersUseCase.execute({ offset, limit });
         res.setHeader('Content-Type', 'application/json');
         res.setHeader('Transfer-Encoding', 'chunked');
         res.send(JSON.stringify({ status: 200, message: 'Users fetched successfully', data: users }));
@@ -56,14 +59,82 @@ export const getUsers = async (req: Request, res: Response, next: NextFunction) 
     }
 }
 
+// export const generateHtmlReport = async (req: Request, res: Response, next: NextFunction) => {
+//     try {
+//         const users = await getAllUsersUseCase.execute({ offset: 0, limit: 100000 });
+//         console.log("🚀 ~ generateHtmlReport ~ users:", users)
+//         res.setHeader('Content-Type', 'text/html');
+//         res.setHeader('Transfer-Encoding', 'chunked');
+//         const htmlStream: Readable = createHtmlReport(users);
+//         console.log("🚀 ~ generateHtmlReport ~ htmlStream:", htmlStream)
+//         htmlStream.pipe(res);
+//     } catch (error) {
+//         next(error);
+//     }
+// };
+
 export const generateHtmlReport = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const users = await getAllUsersUseCase.execute();
         res.setHeader('Content-Type', 'text/html');
         res.setHeader('Transfer-Encoding', 'chunked');
-        const htmlStream: Readable = createHtmlReport(users);
+
+        const htmlStream = new Readable({
+            read() {}
+        });
+
+          // Add error handling for the stream
+          htmlStream.on('error', (err) => {
+            console.error('Stream error:', err);
+            next(err);
+        });
+
+      // Handle backpressure
+      const pushWithBackpressure = (chunk: string): Promise<boolean> => {
+        return new Promise((resolve) => {
+            const canPush = htmlStream.push(chunk);
+            if (canPush) {
+                resolve(true);
+            } else {
+                htmlStream.once('drain', () => resolve(true));
+            }
+        });
+    };
+                // Pipe the stream to the response before pushing data
         htmlStream.pipe(res);
+   // Pipe stream to response
+        htmlStream.pipe(res);
+
+        await pushWithBackpressure('<html><head><title>Users Report</title></head><body>');
+        await pushWithBackpressure('<h1>Users List</h1><ul>');
+
+
+
+        let offset = 0;
+        const limit = 100000; // Reduced chunk size
+        
+        while (true) {
+            const users = await getAllUsersUseCase.execute({ offset, limit });
+            if (users.length === 0) break;
+
+            for (const user of users) {
+                await pushWithBackpressure(
+                    `<li>Name: ${user.name}, Email: ${user.email.getValue()}</li>`
+                );
+                // Add small delay between chunks
+                await new Promise(resolve => setTimeout(resolve, 10));
+            }
+
+            offset += limit;
+            console.log(`Processed ${offset} users`);
+        }
+
+        await pushWithBackpressure('</ul></body></html>');
+        htmlStream.push(null);
+
+        console.log("🚀 ~ generateHtmlReport ~ htmlStream:", htmlStream)
+
     } catch (error) {
+        console.error('Error in generateHtmlReport:', error);
         next(error);
     }
 };

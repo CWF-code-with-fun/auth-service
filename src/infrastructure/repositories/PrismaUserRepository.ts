@@ -7,37 +7,35 @@ import { NotFoundError } from '../../domain/errors';
 
 const prisma = new PrismaClient();
 
+
 export class PrismaUserRepository implements UserRepository {
-    findAllUsers(): Promise<User[]> {
-        const users = prisma.user.findMany();
-        return users.then((users) =>
-            users.map(
-                (user) =>
-                    new User(
-                        user.id,
-                        new Email(user.email),
-                        user.password,
-                        user.refreshToken ?? undefined,
-                    ),
-            ),
+    async findAllUsers({ offset, limit }: { offset: number; limit: number }): Promise<User[]> {
+        const users = await prisma.user.findMany({
+            skip: offset,
+            take: limit,
+        });
+        return users.map(
+            (user) =>
+                new User(
+                    user.id,
+                    new Email(user.email),
+                    user.password,
+                    user.refreshToken ?? undefined,
+                ),
         );
     }
-    async findUserById(id: number): Promise<User | null> {
-        try {
-            const user = await prisma.user.findUnique({
-                where: { id },
-            });
-            if (!user) return null;
-            return new User(
-                user.id,
-                new Email(user.email),
-                user.password,
 
-                user.refreshToken ?? undefined,
-            );
-        } catch (error) {
-            throw new NotFoundError('User not found');
-        }
+    async findUserById(id: number): Promise<User | null> {
+        const user = await prisma.user.findUnique({
+            where: { id },
+        });
+        if (!user) return null;
+        return new User(
+            user.id,
+            new Email(user.email),
+            user.password,
+            user.refreshToken ?? undefined,
+        );
     }
     async createUser(user: User): Promise<User> {
         try {

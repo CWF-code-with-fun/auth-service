@@ -55,22 +55,92 @@ export const createCSV = (users: User[]) => {
     return Buffer.from(csv);
 };
 
+const CHUNK_SIZE = 100; // Number of users per chunk
+
 export const createHtmlReport = (users: User[]): Readable => {
     const htmlStream = new Readable({
         read() {}
     });
 
-    htmlStream.push('<html><head><title>Users Report</title></head><body>');
-    htmlStream.push('<h1>Users List</h1>');
-    htmlStream.push('<ul>');
+    // Send header
+    htmlStream.push('<!DOCTYPE html><html><head>');
+    htmlStream.push('<title>Users Report</title>');
+    htmlStream.push('<style>');
+    htmlStream.push('.user-row { padding: 10px; border-bottom: 1px solid #eee; }');
+    htmlStream.push('</style>');
+    htmlStream.push('</head><body>');
+    htmlStream.push('<h1>Users List</h1><div id="users-container">');
 
-    users.forEach(user => {
-        htmlStream.push(`<li>Name: ${user.name}, Email: ${user.email.getValue()}</li>`);
-    });
+    // Stream users in chunks
+    for (let i = 0; i < users.length; i += CHUNK_SIZE) {
+        const chunk = users.slice(i, i + CHUNK_SIZE);
+        let chunkHtml = '';
+        chunk.forEach(user => {
+            chunkHtml += `<div class="user-row">
+                <strong>Name:</strong> ${user.name}<br>
+                <strong>Email:</strong> ${user.email.getValue()}
+            </div>`;
+        });
+        htmlStream.push(chunkHtml);
+    }
 
-    htmlStream.push('</ul>');
-    htmlStream.push('</body></html>');
-    htmlStream.push(null); // End the stream
+    // Send footer
+    htmlStream.push('</div></body></html>');
+    htmlStream.push(null);
 
     return htmlStream;
+};
+
+export const createStreamingHtmlReport = (): string => {
+    return `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Users Report</title>
+            <style>
+                .user-row { padding: 10px; border-bottom: 1px solid #eee; }
+            </style>
+        </head>
+        <body>
+            <h1>Users List</h1>
+            <div id="users-container"></div>
+            <script>
+                const usersContainer = document.getElementById('users-container');
+                let decoder = new TextDecoder();
+                let buffer = '';
+
+                const reader = new ReadableStreamDefaultReader(window.stream);
+                
+                async function processStream() {
+                    while (true) {
+                        const {value, done} = await reader.read();
+                        if (done) break;
+                        
+                        buffer += decoder.decode(value, {stream: true});
+                        
+                        if (buffer.includes('\\n')) {
+                            const parts = buffer.split('\\n');
+                            buffer = parts.pop() || '';
+                            
+                            for (const part of parts) {
+                                if (part.trim()) {
+                                    const user = JSON.parse(part);
+                                    const userDiv = document.createElement('div');
+                                    userDiv.className = 'user-row';
+                                    userDiv.innerHTML = \`
+                                        <strong>Name:</strong> \${user.name}<br>
+                                        <strong>Email:</strong> \${user.email}
+                                    \`;
+                                    usersContainer.appendChild(userDiv);
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                processStream().catch(console.error);
+            </script>
+        </body>
+        </html>
+    `;
 };

@@ -6,5 +6,5 @@ export interface UserRepository {
     createUser(user: User): Promise<User>;
     updateRefreshToken(userId: number, refreshToken: string): Promise<void>;
     findUserById(id: number): Promise<User | null>;
-    findAllUsers(): Promise<User[]>;
+    findAllUsers({ offset, limit }: { offset: number; limit: number }): Promise<User[]>;
 }

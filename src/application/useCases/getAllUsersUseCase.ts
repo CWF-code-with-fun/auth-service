@@ -1,6 +1,6 @@
+import { UserService } from './../../domain/services/UserService';
 // useCases/getAllUsersUseCase.ts
 
-import { UserService } from "../../domain/services/UserService";
 import { PrismaUserRepository } from "../../infrastructure/repositories/PrismaUserRepository";
 
 
@@ -12,7 +12,7 @@ export class GetAllUsersUseCase {
             this.userService = new UserService(userRepository);
         }
 
-     execute() {
-        return  this.userService.findAllUsers();
-    }
+        async execute({ offset, limit }: { offset: number; limit: number }) {
+            return await this.userService.findAllUsers({ offset, limit });
+        }
 }
