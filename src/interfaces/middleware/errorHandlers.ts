@@ -1,14 +1,13 @@
 import { Request, Response, NextFunction } from 'express';
 import {
+    UserAlreadyExistsError,
     DomainError,
     NotFoundError,
     ValidationError,
     DatabaseError,
 } from '../../domain/errors';
-import { UserAlreadyExistsError } from '../../domain/errors/UserAlreadyExists';
-import { sendResponse } from '../../utils/responseUtils';
 
-export const errorHandler = (
+const errorHandler = (
     err: Error,
     req: Request,
     res: Response,
@@ -18,8 +17,7 @@ export const errorHandler = (
 
     if (err instanceof DomainError) {
         if (err instanceof UserAlreadyExistsError) {
-            return sendResponse(res, {
-                status: 409,
+            return res.status(409).json({
                 success: false,
                 message: err.message,
                 timestamp: new Date().toISOString(),
@@ -33,11 +31,9 @@ export const errorHandler = (
             });
         }
         if (err instanceof ValidationError) {
-            return sendResponse(res, {
-                status: 400,
+            return res.status(400).json({
                 success: false,
-                message: err.messages,
-                errorCode: err.name,
+                message: err.message,
                 timestamp: new Date().toISOString(),
             });
         }
@@ -55,9 +51,11 @@ export const errorHandler = (
         });
     }
 
-    return res.status(500).json({
+    res.status(500).json({
         success: false,
         message: 'Internal Server Error',
         timestamp: new Date().toISOString(),
     });
 };
+
+export default errorHandler;

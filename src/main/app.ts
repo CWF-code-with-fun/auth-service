@@ -82,8 +82,9 @@ import session from 'express-session';
 import passport from '../infrastructure/auth/passportService';
 import authRoutes from '../interfaces/routes/authRoutes';
 import { setupSwagger } from '../infrastructure/swagger/swagger';
-import { errorHandler } from '../interfaces/middleware/errorHandlers';
 import userRoutes from '../interfaces/routes/userRoutes';
+import uploadRoutes from '../interfaces/routes/uploadRoutes';
+import errorHandler from '../interfaces/middleware/errorHandlers';
 
 dotenv.config();
 
@@ -105,6 +106,7 @@ app.use(passport.session());
 // Routes
 app.use('/auth', authRoutes);
 app.use('/users', userRoutes);
+app.use('/api', uploadRoutes); // Add the upload route
 
 // Swagger setup
 setupSwagger(app); // Add this line to set up Swagger
