@@ -44,24 +44,79 @@ export const downloadUsers = async (req: Request, res: Response, next: NextFunct
     }
 };
 
-export const getUsers = async (req: Request, res: Response, next: NextFunction) => {
-    try {
-        const offset = parseInt(req.query.offset as string) || 0;
-        const limit = parseInt(req.query.limit as string) || 1000;
+// export const getUsers = async (req: Request, res: Response, next: NextFunction) => {
+//     try {
+//         const offset = parseInt(req.query.offset as string) || 0;
+//         const limit = parseInt(req.query.limit as string) || 1000;
 
-        const users = await getAllUsersUseCase.execute({ offset, limit });
-        res.setHeader('Content-Type', 'application/json');
-        res.setHeader('Transfer-Encoding', 'chunked');
-        res.send(JSON.stringify({ status: 200, message: 'Users fetched successfully', data: users }));
-        res.end();
+//         const users = await getAllUsersUseCase.execute({ offset, limit });
+//         res.setHeader('Content-Type', 'application/json');
+//         res.setHeader('Transfer-Encoding', 'chunked');
+//         res.send(JSON.stringify({ status: 200, message: 'Users fetched successfully', data: users }));
+//         res.end();
+//     } catch (error) {
+//         next(error);
+//     }
+// }
+
+export const getUsers = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const offset = parseInt(req.query.offset as string, 10) || 0;
+      const limit = parseInt(req.query.limit as string, 10) || 10;
+
+      const users = await getAllUsersUseCase.execute({ offset, limit });
+      sendResponse(res, { status: 200, message: 'Users fetched successfully', data: users });
+  
+      // // Set headers for streaming response
+      // res.setHeader("Content-Type", "application/json");
+      // res.setHeader("Transfer-Encoding", "chunked");
+  
+      // // Create a readable stream
+      // const stream = new Readable({
+      //   read() {}, // No-op for push-based streaming
+      // });
+  
+      // // Pipe the stream to the response
+      // stream.pipe(res);
+  
+      // // Fetch users and stream the data
+      // let currentOffset = offset;
+  
+      // while (true) {
+      //   // Fetch a chunk of users
+      //   const users = await getAllUsersUseCase.execute({ offset: currentOffset, limit });
+      //   console.log("🚀 ~ getUsers ~ users:", users)
+        
+      //   if (!users.length) {
+      //     // End the stream if no more users
+      //     stream.push(null);
+      //     break;
+      //   }
+  
+      //   // Stream each user as a JSON chunk
+      //   users.forEach((user) => {
+      //     stream.push(JSON.stringify(user) + "\n");
+      //   });
+  
+      //   // Increment the offset
+      //   currentOffset += users.length;
+  
+        // Optional: Introduce a small delay for testing (e.g., 500ms between chunks)
+        // await new Promise((resolve) => setTimeout(resolve, 500));
+      // }
     } catch (error) {
-        next(error);
+      console.error("Error streaming users:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to stream users.",
+        error: error,
+      });
     }
-}
+  };
 
 // export const generateHtmlReport = async (req: Request, res: Response, next: NextFunction) => {
 //     try {
-//         const users = await getAllUsersUseCase.execute({ offset: 0, limit: 100000 });
+//         const users = await getAllUsersUseCase.executdoe({ offset: 0, limit: 100000 });
 //         console.log("🚀 ~ generateHtmlReport ~ users:", users)
 //         res.setHeader('Content-Type', 'text/html');
 //         res.setHeader('Transfer-Encoding', 'chunked');
