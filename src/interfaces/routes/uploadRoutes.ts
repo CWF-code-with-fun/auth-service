@@ -6,6 +6,7 @@ const router = express.Router();
 router.post('/upload', (req, res) => {
     upload(req, res, (err) => {
         if (err) {
+            console.log('🚀 ~ upload ~ err:', err);
             return res
                 .status(400)
                 .json({ success: false, message: err.message });

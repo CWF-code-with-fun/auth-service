@@ -10,6 +10,8 @@ router.get('/videos/:filename', (req, res) => {
         '../../../uploads/videos',
         req.params.filename,
     );
+    console.log('🚀 ~ router.get ~ videoPath:', videoPath);
+
     const videoStat = fs.statSync(videoPath);
     const fileSize = videoStat.size;
     const range = req.headers.range;

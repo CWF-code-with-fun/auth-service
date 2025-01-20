@@ -22,11 +22,11 @@ const upload = multer({
 }).single('video');
 
 // Check file type
-function checkFileType(|]
+function checkFileType(
     file: Express.Multer.File,
     cb: multer.FileFilterCallback,
 ) {
-    const filetypes = /mp4|mkv|avi/;
+    const filetypes = /mp4|mkv|mov|avi/;
     const extname = filetypes.test(
         path.extname(file.originalname).toLowerCase(),
     );
